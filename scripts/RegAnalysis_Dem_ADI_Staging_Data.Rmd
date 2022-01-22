@@ -1,0 +1,201 @@
+---
+title: "Prepare Demog-Staging-ADI Data for Regression"
+author: "Steph Reynolds (Stephanie.Reynolds@ucsf.edu)"
+date: "`r format(Sys.time(), '%b %d, %Y  %H:%M %p')`"
+output:
+  html_document:
+    toc: true
+    number_sections: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+# Background
+
+## Project 
+MINDSCAPE: Modeling of infectious network dynamics for surveillance, control and prevention enhancement
+
+## Description
+This file cleans the demographics, Covid staging, and ADI data (`dm_covid_all_7_19_21.csv`) and generates regression analysis.
+
+## Primary Outcome 
+
+  * Morbidity and Mortality (`severe_stg`) -> All patients who reached a max stage of 6+ (severe) were recoded as severe_stg = 1
+
+## Secondary Outcomes
+
+  * Length of Stay (`LOS`) -> Length of stay that patients were hospitalized
+    * Only patients who were hospitalized for >= 1 day - aka inpatients - were included in the regression analysis.
+  * Readmit (`readmit`) --> Patients who were readmitted to hospital within 30(?) days
+
+# Load required packages
+```{r Load required packages, include=F}
+library(tidyverse)
+library(tidymodels)
+library(performance) # to calculate model performance and check model assumptions
+```
+
+# Import and preview data; keep only necessary variables 
+```{r Import and preview data}
+raw <- read_delim("/Users/sreynolds2/Documents/GitHub/MS-ADI/data/raw/dm_covid_all_7_19_21.csv", delim = "|")
+
+# View colnames and identify variables to keep and assign to vector
+colnames(df)
+vars <- c("deid_enc_id", "age", "sex", "smoking", "BMI", "cci_total", "marital_status", "language", "insurance_type", "pat_race", "ethnicity", "ADI_STATERNK_y", "max_stage", "readmit", "hospital_LOS", "end_in_death")
+
+df <- raw %>% 
+  filter(!is.na(ADI_STATERNK_y)) %>%   # Remove rows with missing ADI value
+  filter(hospital_LOS>=1) %>%          # Only include rows where LOS>=1
+  select(vars) %>%                     # Keep only variables in `vars` vector
+  rename(ADI = ADI_STATERNK_y)         # Rename ADI variable for convenience 
+
+n_distinct(df) # 825 unique patients included in final dataset 
+```
+
+# Recode variables, and collapse levels for factor variables 
+```{r Recode variables}
+# Identify variables to be converted to factor type and assign to vector `vars_fct`
+vars_fct <- c("sex", "smoking", "marital_status", "insurance_type", "pat_race", "ethnicity")
+
+# Transform variables above to factor type
+df <- df %>% mutate_at(vars_fct, factor)
+
+# Collapse levels for race
+df$pat_race <- fct_collapse(df$pat_race,
+                            "Unknown/Declined" = c("Unknown", "Declined", "Unknown/Declined"),
+                            "Other" = c("Native Hawaiian or Pacific Islander", "Other", "Other Pacific Islander", "American Indian or Alaska Native"))
+
+# Collapse levels for ethnicity
+df$ethnicity <- fct_collapse(df$ethnicity, 
+                             "Unknown/Declined" = c("Unknown", "Declined", "Unknown/Declined"))
+
+# Collapse levels for insurance type 
+df$insurance_type <- fct_collapse(df$insurance_type, 
+                                  "Medicare/Medi-Cal" = c("01 - Medicare", "02 - Medi-Cal"),
+                                  "Private Insurance" = c("03 - Private Coverage", "04 - Workers Compensation", "06 - Other Government"))
+
+# Collapse levels for smoking
+df$smoking <- fct_collapse(df$smoking,
+                           "Current Smoker" = c("Current Every Day Smoker", "Current Some Day Smoker", "Light Tobacco Smoker", "Smoker, Current Status Unknown"),
+                           "Not Smoker" = c("Former Smoker", "Never Smoker", "Passive Smoke Exposure - Never Smoker"),
+                           "Unknown" = "Unknown If Ever Smoked")
+
+# Collapse levels for marital status
+df$marital_status <- fct_collapse(df$marital_status,
+                                  "Single" = c("Divorced", "Legally Separated", "RDP-Dissolved", "Single", "Widowed"), 
+                                  "Paired" = c("Married", "Significant Other"))
+
+# Collapse levels for language 
+df$language <- factor(ifelse(df$language=="English", "English", "Not English"))
+
+# Recode `end_in_death` as binary variable where yes=1
+df$end_in_death <- as.integer(df$end_in_death=="Yes", 1, 0)
+
+# Recode `readmit` as binary variable where yes=1
+df$readmit <- as.integer(df$readmit=="Yes", 1, 0)
+
+# Create `severe_stg` binary variable to indicate whether patient had a max stage of 6 or above (stages 6-9 considered severe by WHO clinical stages, and stage 10 considered dead)
+df$severe_stg <- ifelse(df$max_stage>=7, 1, 0)
+```
+
+# Save dataframe as csv and RSD
+```{r Save df as RSDa}
+saveRDS(df, "/Users/sreynolds2/Documents/GitHub/MS-ADI/data/dm_stg_adi_7.19.21.rds")
+
+```
+
+
+# Compare full and null models
+```{r}
+# FULL MODEL 
+mod_full <- glm(severe_stg ~ age + sex + smoking + cci_total + marital_status + language + insurance_type + pat_race + ethnicity + ADI, data = df, family = 'binomial')
+
+# Odds ratio of coefficients
+exp(cbind("Odds ratio"=coef(mod_full), confint.default(mod_full, level=0.95)))
+
+# Summarize regression output 
+summary(mod_full)
+
+# Check model assumptions
+check_model(mod_full)
+
+# Check model performance 
+model_performance(mod_full)
+
+# NULL MODEL 
+mod_null <- glm(severe_stg ~ 1, data = df, family = 'binomial')
+
+# Odds ratio of coefficients
+exp(cbind("Odds ratio"=coef(mod_null), confint.default(mod_null, level=0.95)))
+
+# Summarize regression output 
+summary(mod_null)
+
+# Check model performance 
+model_performance(mod_null)
+
+```
+
+# Logistic regression model for severe_stg ~ age 
+```{r Logistic regression model for severe_stg ~ age}
+mod_sev_age <- glm(severe_stg ~ age, data = df, family = 'binomial')
+
+# Odds ratio of coefficients
+exp(cbind("Odds ratio"=coef(mod_sev_age), confint.default(mod_sev_age, level=0.95)))
+
+# Summarize regression output 
+summary(mod_sev_age)
+
+# Check model assumptions
+check_model(mod_sev_age)
+
+# Check model performance 
+model_performance(mod_sev_age)
+```
+
+Continue for all individual predictors of morbidity / mortality.
+
+# Logistic regression model for severe_stg ~ sex 
+```{r Logistic regression model for severe_stg ~ sex}
+mod_sev_sex <- glm(severe_stg ~ sex, data = df, family = 'binomial')
+
+# Odds ratio of coefficients
+exp(cbind("Odds ratio"=coef(mod_sev_sex), confint.default(mod_sev_sex, level=0.95)))
+
+# Summarize regression output 
+summary(mod_sev_sex)
+
+# Check model assumptions
+check_model(mod_sev_sex)
+
+# Check model performance 
+model_performance(mod_sev_sex)
+```
+
+
+
+Sex
+Smoking
+CCI
+Marital status
+Language
+Insurance type 
+Race
+Ethnicity
+ADI 
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -18,23 +18,11 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 MINDSCAPE: Modeling of infectious network dynamics for surveillance, control and prevention enhancement
 
 ## Description
-This file cleans the demographics, Covid staging, and ADI data (`dm_covid_all_7_19_21.csv`) and generates regression analysis.
-
-## Primary Outcome 
-
-  * Morbidity and Mortality (`severe_stg`) -> All patients who reached a max stage of 6+ (severe) were recoded as severe_stg = 1
-
-## Secondary Outcomes
-
-  * Length of Stay (`LOS`) -> Length of stay that patients were hospitalized
-    * Only patients who were hospitalized for >= 1 day - aka inpatients - were included in the regression analysis.
-  * Readmit (`readmit`) --> Patients who were readmitted to hospital within 30(?) days
+This file cleans the demographics, Covid staging, and ADI data (`dm_covid_all_7_19_21.csv`) and prepares the dataset for regression analysis.
 
 # Load required packages
 ```{r Load required packages, include=F}
 library(tidyverse)
-library(tidymodels)
-library(performance) # to calculate model performance and check model assumptions
 ```
 
 # Import and preview data; keep only necessary variables 
@@ -100,102 +88,10 @@ df$readmit <- as.integer(df$readmit=="Yes", 1, 0)
 df$severe_stg <- ifelse(df$max_stage>=7, 1, 0)
 ```
 
-# Save dataframe as csv and RSD
+# Save dataframe as CSV and RSD
 ```{r Save df as RSDa}
 saveRDS(df, "/Users/sreynolds2/Documents/GitHub/MS-ADI/data/dm_stg_adi_7.19.21.rds")
-
+write_csv(df, "/Users/sreynolds2/Documents/GitHub/MS-ADI/data/dm_stg_adi_7.19.21.csv")
 ```
 
-
-# Compare full and null models
-```{r}
-# FULL MODEL 
-mod_full <- glm(severe_stg ~ age + sex + smoking + cci_total + marital_status + language + insurance_type + pat_race + ethnicity + ADI, data = df, family = 'binomial')
-
-# Odds ratio of coefficients
-exp(cbind("Odds ratio"=coef(mod_full), confint.default(mod_full, level=0.95)))
-
-# Summarize regression output 
-summary(mod_full)
-
-# Check model assumptions
-check_model(mod_full)
-
-# Check model performance 
-model_performance(mod_full)
-
-# NULL MODEL 
-mod_null <- glm(severe_stg ~ 1, data = df, family = 'binomial')
-
-# Odds ratio of coefficients
-exp(cbind("Odds ratio"=coef(mod_null), confint.default(mod_null, level=0.95)))
-
-# Summarize regression output 
-summary(mod_null)
-
-# Check model performance 
-model_performance(mod_null)
-
-```
-
-# Logistic regression model for severe_stg ~ age 
-```{r Logistic regression model for severe_stg ~ age}
-mod_sev_age <- glm(severe_stg ~ age, data = df, family = 'binomial')
-
-# Odds ratio of coefficients
-exp(cbind("Odds ratio"=coef(mod_sev_age), confint.default(mod_sev_age, level=0.95)))
-
-# Summarize regression output 
-summary(mod_sev_age)
-
-# Check model assumptions
-check_model(mod_sev_age)
-
-# Check model performance 
-model_performance(mod_sev_age)
-```
-
-Continue for all individual predictors of morbidity / mortality.
-
-# Logistic regression model for severe_stg ~ sex 
-```{r Logistic regression model for severe_stg ~ sex}
-mod_sev_sex <- glm(severe_stg ~ sex, data = df, family = 'binomial')
-
-# Odds ratio of coefficients
-exp(cbind("Odds ratio"=coef(mod_sev_sex), confint.default(mod_sev_sex, level=0.95)))
-
-# Summarize regression output 
-summary(mod_sev_sex)
-
-# Check model assumptions
-check_model(mod_sev_sex)
-
-# Check model performance 
-model_performance(mod_sev_sex)
-```
-
-
-
-Sex
-Smoking
-CCI
-Marital status
-Language
-Insurance type 
-Race
-Ethnicity
-ADI 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# End of document 

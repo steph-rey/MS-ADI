@@ -129,7 +129,7 @@ model_performance(m_readmit_smoke)
 ```
 
 ## Readmit ~ Charlston Comorbidity Index (CCI)
-```{r Severe_stg ~ cci}
+```{r Readmit ~ cci}
 m_readmit_cci <- glm(readmit ~ cci_total, df, family = 'binomial')
 
 # Odds ratio of coefficients
@@ -145,111 +145,107 @@ check_model(m_readmit_cci)
 model_performance(m_readmit_cci)
 ```
 
-
-
-
-##########
-
-## Severe_stg ~ marital status
-```{r Severe_stg ~ marital_status}
-m_sev_marital <- glm(severe_stg ~ marital_status, df, family = 'binomial')
+## Readmit ~ marital status
+```{r Readmit ~ marital status}
+m_readmit_marital <- glm(readmidt ~ marital_status, df, family = 'binomial')
 
 # Odds ratio of coefficients
-exp(cbind("Odds ratio"=coef(m_sev_marital), confint.default(m_sev_marital, level=0.95)))
+exp(cbind("Odds ratio"=coef(m_readmit_marital), confint.default(m_readmit_marital, level=0.95)))
 
 # Summarize regression output 
-summary(m_sev_marital)
+summary(m_readmit_marital)
 
 # Check model assumptions
-check_model(m_sev_marital)
+check_model(m_readmit_marital)
 
 # Check model performance 
-model_performance(m_sev_marital)
+model_performance(m_readmit_marital)
 ```
 
-## Severe_stg ~ language
-```{r Severe_stg ~ language}
-m_sev_language <- glm(severe_stg ~ language, df, family = 'binomial')
+## Readmit ~ language
+```{r Readmit ~ language}
+m_readmit_language <- glm(readmit ~ language, df, family = 'binomial')
 
 # Odds ratio of coefficients
-exp(cbind("Odds ratio"=coef(m_sev_language), confint.default(m_sev_language, level=0.95)))
+exp(cbind("Odds ratio"=coef(m_readmit_language), confint.default(m_readmit_language, level=0.95)))
 
 # Summarize regression output 
-summary(m_sev_language)
+summary(m_readmit_language)
 
 # Check model assumptions
-check_model(m_sev_language)
+check_model(m_readmit_language)
 
 # Check model performance 
-model_performance(m_sev_language)
+model_performance(m_readmit_language)
 ```
 
-## Severe_stg ~ insurance type
-```{r Severe_stg ~ insurance_type}
-m_sev_insur <- glm(severe_stg ~ insurance_type, df, family = 'binomial')
+## Readmit ~ insurance type
+```{r Readmit ~ insurance}
+m_readmit_insur <- glm(readmit ~ insurance_type, df, family = 'binomial')
 
 # Odds ratio of coefficients
-exp(cbind("Odds ratio"=coef(m_sev_insur), confint.default(m_sev_insur, level=0.95)))
+exp(cbind("Odds ratio"=coef(m_readmit_insur), confint.default(m_readmit_insur, level=0.95)))
 
 # Summarize regression output 
-summary(m_sev_insur)
+summary(m_readmit_insur)
 
 # Check model assumptions
-check_model(m_sev_insur)
+check_model(m_readmit_insur)
 
 # Check model performance 
-model_performance(m_sev_insur)
+model_performance(m_readmit_insur)
 ```
 
-## Severe_stg ~ race
-```{r Severe_stg ~ race}
-m_sev_race <- glm(severe_stg ~ pat_race, df, family = 'binomial')
+## Readmit ~ race
+```{r Readmit ~ race}
+m_readmit_race <- glm(readmit ~ pat_race, df, family = 'binomial')
 
 # Odds ratio of coefficients
-exp(cbind("Odds ratio"=coef(m_sev_race), confint.default(m_sev_race, level=0.95)))
+exp(cbind("Odds ratio"=coef(m_readmit_race), confint.default(m_readmit_race, level=0.95)))
 
 # Summarize regression output 
-summary(m_sev_race)
+summary(m_readmit_race)
 
 # Check model assumptions
-check_model(m_sev_race)
+check_model(m_readmit_race)
 
 # Check model performance 
-model_performance(m_sev_race)
+model_performance(m_readmit_race)
 ```
 
-## Severe_stg ~ ethnicity
-```{r Severe_stg ~ ethnicity}
-m_sev_ethnicity <- glm(severe_stg ~ ethnicity, df, family = 'binomial')
+## Readmit ~ ethnicity
+```{r Readmit ~ ethnicity}
+m_readmit_ethnicity <- glm(readmit ~ ethnicity, df, family = 'binomial')
 
 # Odds ratio of coefficients
-exp(cbind("Odds ratio"=coef(m_sev_ethnicity), confint.default(m_sev_ethnicity, level=0.95)))
+exp(cbind("Odds ratio"=coef(m_readmit_ethnicity), confint.default(m_readmit_ethnicity, level=0.95)))
 
 # Summarize regression output 
-summary(m_sev_ethnicity)
+summary(m_readmit_ethnicity)
 
 # Check model assumptions
-check_model(m_sev_ethnicity)
+check_model(m_readmit_ethnicity)
 
 # Check model performance 
-model_performance(m_sev_ethnicity)
+model_performance(m_readmit_ethnicity)
 ```
 
-## Severe_stg ~ Area Deprivation Index (ADI)
-```{r Severe_stg ~ adi}
-m_sev_adi <- glm(severe_stg ~ ADI, df, family = 'binomial')
+## Readmit ~ Area Deprivation Index (ADI)
+```{r Readmit ~ ADI}
+m_readmit_adi <- glm(readmit ~ ADI, df, family = 'binomial')
 
 # Odds ratio of coefficients
-exp(cbind("Odds ratio"=coef(m_sev_adi), confint.default(m_sev_adi, level=0.95)))
+exp(cbind("Odds ratio"=coef(m_readmit_adi), confint.default(m_readmit_adi, level=0.95)))
 
 # Summarize regression output 
-summary(m_sev_adi)
+summary(m_readmit_adi)
 
 # Check model assumptions
-check_model(m_sev_adi)
+check_model(m_readmit_adi)
 
 # Check model performance 
-model_performance(m_sev_adi)
+model_performance(m_readmit_adi)
 ```
 
 # End of document 
+

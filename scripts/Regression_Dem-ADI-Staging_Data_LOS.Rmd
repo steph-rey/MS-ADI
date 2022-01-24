@@ -18,7 +18,7 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 MINDSCAPE: Modeling of infectious network dynamics for surveillance, control and prevention enhancement
 
 ## Description
-This file reads in the demographics, Covid staging, and ADI data (`dm_stg_adi_7.19.21.rds`) and fits a linear regression model using length of stay (LOS) as the outcome. Primary and secondary outcomes for full regression analysis can be found below. 
+This file reads in the demographics, Covid staging, and ADI data (`dm_stg_adi_7.19.21.rds`) and fits a linear regression model with length of stay (`LOS`) as the outcome. Primary and secondary outcomes for full regression analysis can be found below. 
 
 ## Primary Outcome 
 
@@ -28,7 +28,7 @@ This file reads in the demographics, Covid staging, and ADI data (`dm_stg_adi_7.
 
   * Length of Stay (`LOS`) -> Length of stay that patients were hospitalized
     * Only patients who were hospitalized for >= 1 day - aka inpatients - were included in the regression analysis.
-    * NOTE: Since LOS was non-normally distributed, 
+    * NOTE: Since LOS was non-normally distributed, we chose to transform it on the log scale. 
   * Readmit (`readmit`) --> Patients who were readmitted to hospital within 30(?) days
 
 # Load required packages
@@ -180,85 +180,72 @@ check_model(m_LOS_language)
 model_performance(m_LOS_language)
 ```
 
-
-
-## Severe_stg ~ insurance type
-```{r Severe_stg ~ insurance_type}
-m_sev_insur <- glm(severe_stg ~ insurance_type, df, family = 'binomial')
+## LOS ~ insurance type
+```{r LOS ~ insurance type}
+m_LOS_insur <- lm(log(LOS) ~ insurance_type, df)
 
 # Odds ratio of coefficients
-exp(cbind("Odds ratio"=coef(m_sev_insur), confint.default(m_sev_insur, level=0.95)))
+exp(cbind("Odds ratio"=coef(m_LOS_insur), confint.default(m_LOS_insur, level=0.95)))
 
 # Summarize regression output 
-summary(m_sev_insur)
+summary(m_LOS_insur)
 
 # Check model assumptions
-check_model(m_sev_insur)
+check_model(m_LOS_insur)
 
 # Check model performance 
-model_performance(m_sev_insur)
+model_performance(m_LOS_insur)
 ```
 
-## Severe_stg ~ race
-```{r Severe_stg ~ race}
-m_sev_race <- glm(severe_stg ~ race, df, family = 'binomial')
+## LOS ~ race
+```{r LOS ~ race}
+m_LOS_race <- lm(log(LOS) ~ pat_race, df)
 
 # Odds ratio of coefficients
-exp(cbind("Odds ratio"=coef(m_sev_race), confint.default(m_sev_race, level=0.95)))
+exp(cbind("Odds ratio"=coef(m_LOS_race), confint.default(m_LOS_race, level=0.95)))
 
 # Summarize regression output 
-summary(m_sev_race)
+summary(m_LOS_race)
 
 # Check model assumptions
-check_model(m_sev_race)
+check_model(m_LOS_race)
 
 # Check model performance 
-model_performance(m_sev_race)
+model_performance(m_LOS_race)
 ```
 
-## Severe_stg ~ ethnicity
-```{r Severe_stg ~ ethnicity}
-m_sev_ethnicity <- glm(severe_stg ~ ethnicity, df, family = 'binomial')
+## LOS ~ ethnicity
+```{r LOS ~ ethnicity}
+m_LOS_ethnicity <- lm(log(LOS) ~ ethnicity, df)
 
 # Odds ratio of coefficients
-exp(cbind("Odds ratio"=coef(m_sev_ethnicity), confint.default(m_sev_ethnicity, level=0.95)))
+exp(cbind("Odds ratio"=coef(m_LOS_ethnicity), confint.default(m_LOS_ethnicity, level=0.95)))
 
 # Summarize regression output 
-summary(m_sev_ethnicity)
+summary(m_LOS_ethnicity)
 
 # Check model assumptions
-check_model(m_sev_ethnicity)
+check_model(m_LOS_ethnicity)
 
 # Check model performance 
-model_performance(m_sev_ethnicity)
+model_performance(m_LOS_ethnicity)
 ```
 
-## Severe_stg ~ Area Deprivation Index (ADI)
-```{r Severe_stg ~ adi}
-m_sev_adi <- glm(severe_stg ~ ADI, df, family = 'binomial')
+## LOS ~ Area Deprivation Index (ADI)
+```{r LOS ~ ADI}
+m_LOS_ADI <- lm(log(LOS) ~ ADI, df)
 
 # Odds ratio of coefficients
-exp(cbind("Odds ratio"=coef(m_sev_adi), confint.default(m_sev_adi, level=0.95)))
+exp(cbind("Odds ratio"=coef(m_LOS_ADI), confint.default(m_LOS_ADI, level=0.95)))
 
 # Summarize regression output 
-summary(m_sev_adi)
+summary(m_LOS_ADI)
 
 # Check model assumptions
-check_model(m_sev_adi)
+check_model(m_LOS_ADI)
 
 # Check model performance 
-model_performance(m_sev_adi)
+model_performance(m_LOS_ADI)
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
+# End of document 

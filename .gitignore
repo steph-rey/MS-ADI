@@ -39,4 +39,6 @@ rsconnect/
 data/
 
 # Output of knitting Rmd files to HTML
-.html
+scripts/*.html
+reports/*.html
+

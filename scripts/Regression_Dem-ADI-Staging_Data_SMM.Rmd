@@ -18,7 +18,7 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 MINDSCAPE: Modeling of infectious network dynamics for surveillance, control and prevention enhancement
 
 ## Description
-This file reads in the demographics, Covid staging, and ADI data (`dm_stg_adi_7.19.21.rds`) and fits a logistic regression model using severe morbidity and mortality as the outcome. Primary and secondary outcomes for full regression analysis can be found below. 
+This file reads in the demographics, Covid staging, and ADI data (`dm_stg_adi_7.19.21.rds`) and fits a logistic regression model with severe morbidity and mortality (`severe_stg`) as the outcome. Primary and secondary outcomes for full regression analysis can be found below. 
 
 ## Primary Outcome 
 
@@ -74,6 +74,7 @@ summary(m_null)
 model_performance(m_null)
 
 ```
+
 # Generate simple logistic regressions for severe morbidity and mortality
 
 ## Severe_stg ~ age
@@ -197,7 +198,7 @@ model_performance(m_sev_insur)
 
 ## Severe_stg ~ race
 ```{r Severe_stg ~ race}
-m_sev_race <- glm(severe_stg ~ race, df, family = 'binomial')
+m_sev_race <- glm(severe_stg ~ pat_race, df, family = 'binomial')
 
 # Odds ratio of coefficients
 exp(cbind("Odds ratio"=coef(m_sev_race), confint.default(m_sev_race, level=0.95)))

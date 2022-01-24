@@ -147,7 +147,7 @@ model_performance(m_readmit_cci)
 
 ## Readmit ~ marital status
 ```{r Readmit ~ marital status}
-m_readmit_marital <- glm(readmidt ~ marital_status, df, family = 'binomial')
+m_readmit_marital <- glm(readmit ~ marital_status, df, family = 'binomial')
 
 # Odds ratio of coefficients
 exp(cbind("Odds ratio"=coef(m_readmit_marital), confint.default(m_readmit_marital, level=0.95)))
@@ -246,6 +246,4 @@ check_model(m_readmit_adi)
 # Check model performance 
 model_performance(m_readmit_adi)
 ```
-
-# End of document 
 

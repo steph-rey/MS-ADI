@@ -114,7 +114,7 @@ model_performance(m_LOS_sex)
 
 ## LOS ~ smoking 
 ```{r LOS ~ smoking}
-m_LOS_smoking <- lm(log(LOS) ~ sex, df)
+m_LOS_smoking <- lm(log(LOS) ~ smoking, df)
 
 # Odds ratio of coefficients
 exp(cbind("Odds ratio"=coef(m_LOS_smoking), confint.default(m_LOS_smoking, level=0.95)))
@@ -247,5 +247,3 @@ check_model(m_LOS_ADI)
 # Check model performance 
 model_performance(m_LOS_ADI)
 ```
-
-# End of document 

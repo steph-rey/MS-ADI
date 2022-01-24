@@ -89,9 +89,7 @@ df$severe_stg <- ifelse(df$max_stage>=7, 1, 0)
 ```
 
 # Save dataframe as CSV and RSD
-```{r Save df as RSDa}
+```{r Save df as RSD, eval = FALSE}
 saveRDS(df, "/Users/sreynolds2/Documents/GitHub/MS-ADI/data/dm_stg_adi_7.19.21.rds")
 write_csv(df, "/Users/sreynolds2/Documents/GitHub/MS-ADI/data/dm_stg_adi_7.19.21.csv")
 ```
-
-# End of document 

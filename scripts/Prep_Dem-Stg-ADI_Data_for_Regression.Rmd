@@ -53,7 +53,7 @@ df <- df %>% mutate_at(vars_fct, factor)
 # Collapse levels for race
 df$pat_race <- fct_collapse(df$pat_race,
                             "Unknown/Declined" = c("Unknown", "Declined", "Unknown/Declined"),
-                            "Other" = c("Native Hawaiian or Pacific Islander", "Other", "Other Pacific Islander", "American Indian or Alaska Native"))
+                            "Other" = c("Native Hawaiian or Other Pacific Islander", "Other", "Other Pacific Islander", "American Indian or Alaska Native"))
 
 # Collapse levels for ethnicity
 df$ethnicity <- fct_collapse(df$ethnicity, 

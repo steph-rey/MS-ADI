@@ -1,0 +1,94 @@
+---
+title: "Regression Analysis for Demog-Staging-ADI Data -- Charlson Comorbidity Index & Severity at Admission"
+author: "Steph Reynolds (Stephanie.Reynolds@ucsf.edu)"
+date: "`r format(Sys.time(), '%b %d, %Y  %H:%M %p')`"
+output:
+  html_document:
+    toc: true
+    number_sections: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+# Background
+
+## Project
+
+MINDSCAPE: Modeling of infectious network dynamics for surveillance, control and prevention enhancement
+
+## Description
+
+This file reads in the demographics and COVID staging data (`dm_stg_adi_7.19.21.rds`) and fits 2 linear regression models with the following as the response variables:
+
+1.  Charlson Comorbidity Index (`cci_total`)
+2.  Severity stage at admission (`admission_stage`)
+
+**Predictors include:** age (`age`), sex (`sex`), smoking status (`smoking`), marital status (`marital_status`), language (`language`), insurance type (`insurance_type`), race (`pat_race`), ethnicity (`ethnicity`), and area deprivation index (`ADI`).
+
+# Load required packages
+
+```{r Load required packages, include=F}
+library(tidyverse)
+library(tidymodels)
+library(performance) # to calculate model performance and check model assumptions
+library(sjPlot) # to create tables to compare regression output 
+```
+
+# Import and preview data
+
+```{r Import and preview df}
+df <- readRDS("/Users/sreynolds2/Documents/GitHub/MS-ADI/data/dm_stg_adi_7.19.21.rds")
+
+head(df, n=10)
+```
+
+# Charlson Comorbidity Index (`cci_total`) as a function of ADI and demographics (non-hospital factors)
+
+```{r Full model of CCI}
+# Full model of CCI
+m_CCI_full <- lm(cci_total ~ age + sex + smoking + marital_status + language + insurance_type + pat_race + ethnicity + ADI, data = df)
+
+# Odds ratio of coefficients
+exp(cbind("Odds ratio"=coef(m_CCI_full), confint.default(m_CCI_full, level=0.95)))
+
+# Summarize regression output 
+summary(m_CCI_full)
+
+# Check model assumptions
+check_model(m_CCI_full)
+
+# Check model performance 
+model_performance(m_CCI_full)
+```
+
+# Severity at admission (`admission_stage`) as a function of ADI, CCI, and demographics
+
+```{r Full model of admission stage}
+# Full model of admission stage
+m_adm_stg_full <- lm(admission_stage ~ age + sex + smoking + marital_status + language + insurance_type + pat_race + ethnicity + ADI + cci_total, data = df)
+
+# Odds ratio of coefficients
+exp(cbind("Odds ratio"=coef(m_adm_stg_full), confint.default(m_adm_stg_full, level=0.95)))
+
+# Summarize regression output 
+summary(m_adm_stg_full)
+
+# Check model assumptions
+check_model(m_adm_stg_full)
+
+# Check model performance 
+model_performance(m_adm_stg_full)
+```
+
+# Create table to compare regression model output
+
+```{r Create table to compare model output}
+tab_model(m_CCI_full, m_adm_stg_full,
+          p.style = "numeric_stars",
+          #show.reflvl = T,
+          pred.labels = c("Intercept", "Age", "Male", "Non-Smoker", "Unknown Smoker", "Marital Status: Paired", "Marital Status: Unknown/Declined", "Not English", "Private Insurance", "Asian", "Black", "White", "Unknown/Declined Race", "Hispanic/Latino", "Not Hispanic", "Area Deprivation Index (ADI)", "Charlson Comorbidity Index (CCI)"),
+          dv.labels = c("CCI ~ Demog", "Severity at Admission ~ Demog + ADI + CCI"),
+          title = 'Regression Models relating Demographics, CCI, ADI, and Severity at Admission')
+```

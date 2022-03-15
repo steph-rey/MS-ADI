@@ -14,23 +14,26 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 
 # Background
 
-## Project 
+## Project
+
 MINDSCAPE: Modeling of infectious network dynamics for surveillance, control and prevention enhancement
 
 ## Description
-This file reads in the demographics, Covid staging, and ADI data (`dm_stg_adi_7.19.21.rds`) and fits a logistic regression model with severe morbidity and mortality (`severe_stg`) as the outcome. Primary and secondary outcomes for full regression analysis can be found below. 
 
-## Primary Outcome 
+This file reads in the demographics, Covid staging, and ADI data (`dm_stg_adi_7.19.21.rds`) and fits a logistic regression model with severe morbidity and mortality (`severe_stg`) as the outcome. Primary and secondary outcomes for full regression analysis can be found below.
 
-  * Morbidity and Mortality (`severe_stg`) -> All patients who reached a max stage of 6+ (severe) were recoded as severe_stg = 1
+## Primary Outcome
+
+-   Morbidity and Mortality (`severe_stg`) -\> All patients who reached a max stage of 6+ (severe) were recoded as severe_stg = 1
 
 ## Secondary Outcomes
 
-  * Length of Stay (`LOS`) -> Length of stay that patients were hospitalized
-    * Only patients who were hospitalized for >= 1 day - aka inpatients - were included in the regression analysis.
-  * Readmit (`readmit`) --> Patients who were readmitted to hospital within 30(?) days
+-   Length of Stay (`LOS`) -\> Length of stay that patients were hospitalized
+    -   Only patients who were hospitalized for \>= 1 day - aka inpatients - were included in the regression analysis.
+-   Readmit (`readmit`) --\> Patients who were readmitted to hospital within 30(?) days
 
 # Load required packages
+
 ```{r Load required packages, include=F}
 library(tidyverse)
 library(tidymodels)
@@ -38,14 +41,16 @@ library(performance) # to calculate model performance and check model assumption
 ```
 
 # Import and preview data
+
 ```{r Read in df}
 df <- readRDS("/Users/sreynolds2/Documents/GitHub/MS-ADI/data/dm_stg_adi_7.19.21.rds")
 
 head(df, n=10)
 ```
 
-# Compare full and null models -- Severe morbidity and mortality (`severe_stg`)
-```{r Full and null models of LOS}
+# Compare full and null models for severe morbidity and mortality (SMM)
+
+```{r Full and null models of SMM}
 # FULL MODEL 
 m_full <- glm(severe_stg ~ age + sex + smoking + cci_total + marital_status + language + insurance_type + pat_race + ethnicity + ADI + admission_stage, data = df, family = 'binomial')
 
@@ -77,7 +82,8 @@ model_performance(m_null)
 
 # Generate simple logistic regressions for severe morbidity and mortality
 
-## Severe_stg ~ age
+## Severe_stg \~ age
+
 ```{r Severe_stg ~ age}
 m_sev_age <- glm(severe_stg ~ age, df, family = 'binomial')
 
@@ -94,7 +100,8 @@ check_model(m_sev_age)
 model_performance(m_sev_age)
 ```
 
-## Severe_stg ~ sex 
+## Severe_stg \~ sex
+
 ```{r Severe_stg ~ sex}
 m_sev_sex <- glm(severe_stg ~ sex, df, family = 'binomial')
 
@@ -111,7 +118,8 @@ check_model(m_sev_sex)
 model_performance(m_sev_sex)
 ```
 
-## Severe_stg ~ smoking
+## Severe_stg \~ smoking
+
 ```{r Severe_stg ~ smoking}
 m_sev_smoke <- glm(severe_stg ~ smoking, df, family = 'binomial')
 
@@ -128,7 +136,8 @@ check_model(m_sev_smoke)
 model_performance(m_sev_smoke)
 ```
 
-## Severe_stg ~ Charlston Comorbidity Index (CCI)
+## Severe_stg \~ Charlston Comorbidity Index (CCI)
+
 ```{r Severe_stg ~ cci}
 m_sev_cci <- glm(severe_stg ~ cci_total, df, family = 'binomial')
 
@@ -145,7 +154,8 @@ check_model(m_sev_cci)
 model_performance(m_sev_cci)
 ```
 
-## Severe_stg ~ marital status
+## Severe_stg \~ marital status
+
 ```{r Severe_stg ~ marital_status}
 m_sev_marital <- glm(severe_stg ~ marital_status, df, family = 'binomial')
 
@@ -162,7 +172,8 @@ check_model(m_sev_marital)
 model_performance(m_sev_marital)
 ```
 
-## Severe_stg ~ language
+## Severe_stg \~ language
+
 ```{r Severe_stg ~ language}
 m_sev_language <- glm(severe_stg ~ language, df, family = 'binomial')
 
@@ -179,7 +190,8 @@ check_model(m_sev_language)
 model_performance(m_sev_language)
 ```
 
-## Severe_stg ~ insurance type
+## Severe_stg \~ insurance type
+
 ```{r Severe_stg ~ insurance_type}
 m_sev_insur <- glm(severe_stg ~ insurance_type, df, family = 'binomial')
 
@@ -196,7 +208,8 @@ check_model(m_sev_insur)
 model_performance(m_sev_insur)
 ```
 
-## Severe_stg ~ race
+## Severe_stg \~ race
+
 ```{r Severe_stg ~ race}
 m_sev_race <- glm(severe_stg ~ pat_race, df, family = 'binomial')
 
@@ -213,7 +226,8 @@ check_model(m_sev_race)
 model_performance(m_sev_race)
 ```
 
-## Severe_stg ~ ethnicity
+## Severe_stg \~ ethnicity
+
 ```{r Severe_stg ~ ethnicity}
 m_sev_ethnicity <- glm(severe_stg ~ ethnicity, df, family = 'binomial')
 
@@ -230,7 +244,8 @@ check_model(m_sev_ethnicity)
 model_performance(m_sev_ethnicity)
 ```
 
-## Severe_stg ~ Area Deprivation Index (ADI)
+## Severe_stg \~ Area Deprivation Index (ADI)
+
 ```{r Severe_stg ~ adi}
 m_sev_adi <- glm(severe_stg ~ ADI, df, family = 'binomial')
 
@@ -247,7 +262,8 @@ check_model(m_sev_adi)
 model_performance(m_sev_adi)
 ```
 
-## Severe_stg ~ admission stage 
+## Severe_stg \~ admission stage
+
 ```{r Severe_stg ~ admission_stage}
 m_sev_adm_stg <- glm(severe_stg ~ admission_stage, df, family = 'binomial')
 

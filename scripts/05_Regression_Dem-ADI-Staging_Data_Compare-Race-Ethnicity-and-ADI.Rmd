@@ -1,0 +1,314 @@
+---
+title: "Regression Analysis for Demog-Staging-ADI Data -- Comparison of Race/Ethnicity and ADI"
+author: "Steph Reynolds (Stephanie.Reynolds@ucsf.edu)"
+date: "`r format(Sys.time(), '%b %d, %Y  %H:%M %p')`"
+output:
+  html_document:
+    toc: true
+    number_sections: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+# Background
+
+## Project
+
+MINDSCAPE: Modeling of infectious network dynamics for surveillance, control and prevention enhancement
+
+## Description
+
+This file reads in the demographics, Covid staging, and ADI data (`dm_stg_adi_7.19.21.rds`) and fits a logistic regression model with readmit (`readmit`) as the outcome. Primary and secondary outcomes for full regression analysis can be found below.
+
+## Primary Outcome
+
+-   Morbidity and Mortality (`severe_stg`) -\> All patients who reached a max stage of 6+ (severe) were recoded as severe_stg = 1
+
+## Secondary Outcomes
+
+-   Length of Stay (`LOS`) -\> Length of stay that patients were hospitalized
+    -   Only patients who were hospitalized for \>= 1 day - aka inpatients - were included in the regression analysis.
+-   Readmit (`readmit`) --\> Patients who were readmitted to hospital within 30(?) days
+
+# Load required packages
+
+```{r Load required packages, include=F}
+library(tidyverse)
+library(tidymodels)
+library(performance) # to calculate model performance and check model assumptions
+library(sjPlot) # to create tables from regression models 
+```
+
+# Import and preview data
+
+```{r Read in df}
+df <- readRDS("/Users/sreynolds2/Documents/GitHub/MS-ADI/data/dm_stg_adi_7.19.21.rds")
+
+head(df, n=10)
+```
+
+# Primary Outcome: Severe morbidity and mortality (`severe_stg`)
+
+## SMM model with `pat_race`, `ethnicity`, and `ADI`
+
+```{r Full model of SMM}
+# Full model of SMM -- includes race, ethnicity, and ADI 
+m_SMM_full <- glm(severe_stg ~ age + sex + smoking + cci_total + marital_status + language + insurance_type + pat_race + ethnicity + ADI + admission_stage, data = df, family = 'binomial')
+
+# Odds ratio of coefficients
+exp(cbind("Odds ratio"=coef(m_SMM_full), confint.default(m_SMM_full, level=0.95)))
+
+# Summarize regression output 
+summary(m_SMM_full)
+
+# Check model assumptions
+check_model(m_SMM_full)
+
+# Check model performance 
+model_performance(m_SMM_full)
+```
+
+## SMM model without `pat_race` and `ethnicity`
+
+```{r SMM model without race/ethnicity}
+# Model without race/ethnicity 
+m_SMM_no_race <- glm(severe_stg ~ age + sex + smoking + cci_total + marital_status + language + insurance_type + ADI + admission_stage, data = df, family = 'binomial')
+
+# Odds ratio of coefficients
+exp(cbind("Odds ratio"=coef(m_SMM_no_race), confint.default(m_SMM_no_race, level=0.95)))
+
+# Summarize regression output 
+summary(m_SMM_no_race)
+
+# Check model assumptions
+check_model(m_SMM_no_race)
+
+# Check model performance 
+model_performance(m_SMM_no_race)
+```
+
+## SMM model without `ADI`
+
+```{r SMM model without ADI}
+# Model without ADI  
+m_SMM_no_ADI <- glm(severe_stg ~ age + sex + smoking + cci_total + marital_status + language + insurance_type + pat_race + ethnicity + admission_stage, data = df, family = 'binomial')
+
+# Odds ratio of coefficients
+exp(cbind("Odds ratio"=coef(m_SMM_no_ADI), confint.default(m_SMM_no_ADI, level=0.95)))
+
+# Summarize regression output 
+summary(m_SMM_no_ADI)
+
+# Check model assumptions
+check_model(m_SMM_no_ADI)
+
+# Check model performance 
+model_performance(m_SMM_no_ADI)
+```
+
+## SMM model without `pat_race`, `ethnicity`, or `ADI`
+
+```{r SMM model, without ADI or race/ethnicity}
+# Model without ADI or race/ethnicity 
+m_SMM_noADIorRace <- glm(severe_stg ~ age + sex + smoking + cci_total + marital_status + language + insurance_type + admission_stage, data = df, family = 'binomial')
+
+# Odds ratio of coefficients
+exp(cbind("Odds ratio"=coef(m_SMM_noADIorRace), confint.default(m_SMM_noADIorRace, level=0.95)))
+
+# Summarize regression output 
+summary(m_SMM_noADIorRace)
+
+# Check model assumptions
+check_model(m_SMM_noADIorRace)
+
+# Check model performance 
+model_performance(m_SMM_noADIorRace)
+```
+
+## Create table to compare results from SMM regression models
+
+```{r Create table to compare SMM models}
+tab_model(m_SMM_full, m_SMM_noADIorRace, m_SMM_no_ADI, m_SMM_no_race,
+                  show.reflvl = T,
+                  p.style = "numeric_stars",
+          dv.labels = c("Full Model", "Model without ADI or Race/Ethnicity", "Model without ADI", "Model without Race/Ethnicity"))
+
+#pred.labels = c("Intercept", "Age", "Sex: Male", "Non-Smoker", "Smoking: Unknown", "Charlson Comorbidity Index", "Marital Status: Paired", "Marital Status: Unk/Dec", "Language: Not English", "Insurance Type: Private", "Race: Asian", "Race: Black", "Race: White", "Ethnicity: Hispanic", "Ethnicity: Not Hispanic", "Area Deprivation Index", "Admission Stage"),
+```
+
+# Secondary Outcome: Length of Stay (`hospital_LOS`)
+
+## LOS model with `pat_race`, `ethnicity`, and `ADI`
+
+```{r Full model of LOS}
+# Full model of LOS -- includes race, ethnicity, and ADI 
+m_LOS_full <- lm(hospital_LOS ~ age + sex + smoking + cci_total + marital_status + language + insurance_type + pat_race + ethnicity + ADI + admission_stage, data = df)
+
+# Odds ratio of coefficients
+exp(cbind("Odds ratio"=coef(m_LOS_full), confint.default(m_LOS_full, level=0.95)))
+
+# Summarize regression output 
+summary(m_LOS_full)
+
+# Check model assumptions
+check_model(m_LOS_full)
+
+# Check model performance 
+model_performance(m_LOS_full)
+```
+
+## LOS model without `pat_race` and `ethnicity`
+
+```{r LOS model without race/ethnicity}
+# Model without race/ethnicity 
+m_LOS_no_race <- lm(hospital_LOS ~ age + sex + smoking + cci_total + marital_status + language + insurance_type + ADI + admission_stage, data = df)
+
+# Odds ratio of coefficients
+exp(cbind("Odds ratio"=coef(m_LOS_no_race), confint.default(m_LOS_no_race, level=0.95)))
+
+# Summarize regression output 
+summary(m_LOS_no_race)
+
+# Check model assumptions
+check_model(m_LOS_no_race)
+
+# Check model performance 
+model_performance(m_LOS_no_race)
+```
+
+## LOS model without `ADI`
+
+```{r LOS model without ADI}
+# Model without ADI  
+m_LOS_no_ADI <- lm(hospital_LOS ~ age + sex + smoking + cci_total + marital_status + language + insurance_type + pat_race + ethnicity + admission_stage, data = df)
+
+# Odds ratio of coefficients
+exp(cbind("Odds ratio"=coef(m_LOS_no_ADI), confint.default(m_LOS_no_ADI, level=0.95)))
+
+# Summarize regression output 
+summary(m_LOS_no_ADI)
+
+# Check model assumptions
+check_model(m_LOS_no_ADI)
+
+# Check model performance 
+model_performance(m_LOS_no_ADI)
+```
+
+## LOS model without `pat_race`, `ethnicity`, or `ADI`
+
+```{r LOS model, without ADI or race/ethnicity}
+# Model without ADI or race/ethnicity 
+m_LOS_noADIorRace <- lm(hospital_LOS ~ age + sex + smoking + cci_total + marital_status + language + insurance_type + admission_stage, data = df)
+
+# Odds ratio of coefficients
+exp(cbind("Odds ratio"=coef(m_LOS_noADIorRace), confint.default(m_LOS_noADIorRace, level=0.95)))
+
+# Summarize regression output 
+summary(m_LOS_noADIorRace)
+
+# Check model assumptions
+check_model(m_LOS_noADIorRace)
+
+# Check model performance 
+model_performance(m_LOS_noADIorRace)
+```
+
+## Create table to compare results from LOS regression models
+
+```{r Create table to compare LOS models}
+tab_model(m_LOS_full, m_LOS_noADIorRace, m_LOS_no_ADI, m_LOS_no_race,
+                  show.reflvl = T,
+                  p.style = "numeric_stars",
+          dv.labels = c("Full Model", "Model without ADI or Race/Ethnicity", "Model without ADI", "Model without Race/Ethnicity"))
+```
+
+# Secondary Outcome: Readmit (`readmit`)
+
+## Readmit model with `pat_race`, `ethnicity`, and `ADI`
+
+```{r Full model of Readmit}
+# Full model of readmit -- includes race, ethnicity, and ADI 
+m_readmit_full <- glm(readmit ~ age + sex + smoking + cci_total + marital_status + language + insurance_type + pat_race + ethnicity + ADI + admission_stage, data = df, family = 'binomial')
+
+# Odds ratio of coefficients
+exp(cbind("Odds ratio"=coef(m_readmit_full), confint.default(m_readmit_full, level=0.95)))
+
+# Summarize regression output 
+summary(m_readmit_full)
+
+# Check model assumptions
+check_model(m_readmit_full)
+
+# Check model performance 
+model_performance(m_readmit_full)
+```
+
+## Readmit model without `pat_race` and `ethnicity`
+
+```{r Readmit model without race/ethnicity}
+# Model without race/ethnicity 
+m_readmit_no_race <- glm(readmit ~ age + sex + smoking + cci_total + marital_status + language + insurance_type + ADI + admission_stage, data = df, family = 'binomial')
+
+# Odds ratio of coefficients
+exp(cbind("Odds ratio"=coef(m_readmit_no_race), confint.default(m_readmit_no_race, level=0.95)))
+
+# Summarize regression output 
+summary(m_readmit_no_race)
+
+# Check model assumptions
+check_model(m_readmit_no_race)
+
+# Check model performance 
+model_performance(m_readmit_no_race)
+```
+
+## Readmit model without `ADI`
+
+```{r Readmit model without ADI}
+# Model without ADI  
+m_readmit_no_ADI <- glm(readmit ~ age + sex + smoking + cci_total + marital_status + language + insurance_type + pat_race + ethnicity + admission_stage, data = df, family = 'binomial')
+
+# Odds ratio of coefficients
+exp(cbind("Odds ratio"=coef(m_readmit_no_ADI), confint.default(m_readmit_no_ADI, level=0.95)))
+
+# Summarize regression output 
+summary(m_readmit_no_ADI)
+
+# Check model assumptions
+check_model(m_readmit_no_ADI)
+
+# Check model performance 
+model_performance(m_readmit_no_ADI)
+```
+
+## Readmit model without `pat_race`, `ethnicity`, or `ADI`
+
+```{r Readmit model, without ADI or race/ethnicity}
+# Model without ADI or race/ethnicity 
+m_readmit_noADIorRace <- glm(readmit ~ age + sex + smoking + cci_total + marital_status + language + insurance_type + admission_stage, data = df, family = 'binomial')
+
+# Odds ratio of coefficients
+exp(cbind("Odds ratio"=coef(m_readmit_noADIorRace), confint.default(m_readmit_noADIorRace, level=0.95)))
+
+# Summarize regression output 
+summary(m_readmit_noADIorRace)
+
+# Check model assumptions
+check_model(m_readmit_noADIorRace)
+
+# Check model performance 
+model_performance(m_readmit_noADIorRace)
+```
+
+# Create table to compare results from readmit regression models
+
+```{r Create table to compare readmit models}
+tab_model(m_readmit_full, m_readmit_noADIorRace, m_readmit_no_ADI, m_readmit_no_race,
+                  show.reflvl = T,
+                  p.style = "numeric_stars",
+          dv.labels = c("Full Model", "Model without ADI or Race/Ethnicity", "Model without ADI", "Model without Race/Ethnicity"))
+```
+

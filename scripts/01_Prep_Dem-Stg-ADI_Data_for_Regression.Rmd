@@ -30,8 +30,8 @@ library(tidyverse)
 raw <- read_delim("/Users/sreynolds2/Documents/GitHub/MS-ADI/data/raw/dm_covid_all_7_19_21.csv", delim = "|")
 
 # View colnames and identify variables to keep and assign to vector
-colnames(df)
-vars <- c("deid_enc_id", "age", "sex", "smoking", "BMI", "cci_total", "marital_status", "language", "insurance_type", "pat_race", "ethnicity", "ADI_STATERNK_y", "max_stage", "readmit", "hospital_LOS", "end_in_death")
+colnames(raw)
+vars <- c("deid_enc_id", "age", "sex", "smoking", "BMI", "cci_total", "marital_status", "language", "insurance_type", "pat_race", "ethnicity", "ADI_STATERNK_y", "max_stage", "readmit", "hospital_LOS", "end_in_death", "admission_stage")
 
 df <- raw %>% 
   filter(!is.na(ADI_STATERNK_y)) %>%   # Remove rows with missing ADI value
@@ -86,6 +86,12 @@ df$readmit <- as.integer(df$readmit=="Yes", 1, 0)
 
 # Create `severe_stg` binary variable to indicate whether patient had a max stage of 6 or above (stages 6-9 considered severe by WHO clinical stages, and stage 10 considered dead)
 df$severe_stg <- ifelse(df$max_stage>=7, 1, 0)
+
+# Recode `admission_stage` where stages 7-9 are grouped into 7; leave stages 4-6 as-is
+df$admission_stage <- case_when(df$admission_stage==4 ~ 4,
+                                df$admission_stage==5 ~ 5,
+                                df$admission_stage==6 ~ 6,
+                                df$admission_stage %in% 7:9 ~ 7)
 ```
 
 # Save dataframe as CSV and RSD

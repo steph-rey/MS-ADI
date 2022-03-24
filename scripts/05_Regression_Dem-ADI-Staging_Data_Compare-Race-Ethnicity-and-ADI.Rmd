@@ -51,6 +51,16 @@ head(df, n=10)
 
 # Primary Outcome: Severe morbidity and mortality (`severe_stg`)
 
+## SMM null model 
+
+```{r Null model of SMM}
+# Null model of SMM 
+m_SMM_null <- glm(severe_stg ~ 1, data = df, family = 'binomial')
+
+# Summarize regression output 
+summary(m_SMM_null)
+```
+
 ## SMM model with `pat_race`, `ethnicity`, and `ADI`
 
 ```{r Full model of SMM}
@@ -137,6 +147,32 @@ tab_model(m_SMM_full, m_SMM_noADIorRace, m_SMM_no_ADI, m_SMM_no_race,
 
 #pred.labels = c("Intercept", "Age", "Sex: Male", "Non-Smoker", "Smoking: Unknown", "Charlson Comorbidity Index", "Marital Status: Paired", "Marital Status: Unk/Dec", "Language: Not English", "Insurance Type: Private", "Race: Asian", "Race: Black", "Race: White", "Ethnicity: Hispanic", "Ethnicity: Not Hispanic", "Area Deprivation Index", "Admission Stage"),
 ```
+
+# Compare SMM model performance 
+
+```{r Compare SMM model performance}
+
+# Test performance - compares BF, Omega2, p(Omega2), LR, p(LR)
+performance::test_performance(m_SMM_full, m_SMM_noADIorRace, m_SMM_no_ADI, m_SMM_no_race)
+
+# Compare performance - compares AIC, BIC, Tjur's R2, RMSE, Sigma, Log Loss, PCP
+result <- compare_performance(m_SMM_full, m_SMM_noADIorRace, m_SMM_no_ADI, m_SMM_no_race)
+
+# Spiderweb plot of result - different indices are normalized and larger values indicate better model performance. Hence, points closer to the center indicate worse fit indices.
+plot(result)
+
+# Test Bayes Factor - compares BIC 
+performance::test_bf(m_SMM_full, m_SMM_noADIorRace, m_SMM_no_ADI, m_SMM_no_race)
+
+# Same as above
+result_bf <- bayestestR::bayesfactor_models(m_SMM_full, m_SMM_noADIorRace, m_SMM_no_ADI, m_SMM_no_race, denominator = 1)
+as.matrix(result_bf)
+
+# Vuong Test - compares Omega2, p(Omega2), LR, and p(LR)
+# Can't use this to compare all 4 models at once, since they are not nested at that point.
+test_vuong(m_SMM_full, m_SMM_no_race)
+```
+
 
 # Secondary Outcome: Length of Stay (`hospital_LOS`)
 

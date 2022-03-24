@@ -24,7 +24,7 @@ This file reads in the demographics, Covid staging, and ADI data (`dm_stg_adi_7.
 
 ## Primary Outcome
 
--   Morbidity and Mortality (`severe_stg`) -\> All patients who reached a max stage of 6+ (severe) were recoded as severe_stg = 1
+-   Severe Morbidity and Mortality (`severe_stg`) -\> All patients who reached a max stage of 6+ (severe) were recoded as severe_stg = 1
 
 ## Secondary Outcomes
 
@@ -77,7 +77,6 @@ summary(m_null)
 
 # Check model performance 
 model_performance(m_null)
-
 ```
 
 # Generate simple logistic regressions for severe morbidity and mortality

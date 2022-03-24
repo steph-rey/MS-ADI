@@ -53,30 +53,36 @@ df <- df %>% mutate_at(vars_fct, factor)
 # Collapse levels for race
 df$pat_race <- fct_collapse(df$pat_race,
                             "Unknown/Declined" = c("Unknown", "Declined", "Unknown/Declined"),
-                            "Other" = c("Native Hawaiian or Other Pacific Islander", "Other", "Other Pacific Islander", "American Indian or Alaska Native"))
+                            "Other" = c("Native Hawaiian or Other Pacific Islander", "Other", "Other Pacific Islander", "American Indian or Alaska Native")) %>% 
+  relevel(df$pat_race, ref = "White or Caucasian")
 
 # Collapse levels for ethnicity
 df$ethnicity <- fct_collapse(df$ethnicity, 
-                             "Unknown/Declined" = c("Unknown", "Declined", "Unknown/Declined"))
+                             "Unknown/Declined" = c("Unknown", "Declined", "Unknown/Declined")) %>% 
+  relevel(df$ethnicity, ref = "Not Hispanic or Latino")
 
 # Collapse levels for insurance type 
 df$insurance_type <- fct_collapse(df$insurance_type, 
                                   "Medicare/Medi-Cal" = c("01 - Medicare", "02 - Medi-Cal"),
-                                  "Private Insurance" = c("03 - Private Coverage", "04 - Workers Compensation", "06 - Other Government"))
+                                  "Private Insurance" = c("03 - Private Coverage", "04 - Workers Compensation", "06 - Other Government")) %>% 
+  relevel(df$insurance_type, ref = "Private Insurance")
 
 # Collapse levels for smoking
 df$smoking <- fct_collapse(df$smoking,
                            "Current Smoker" = c("Current Every Day Smoker", "Current Some Day Smoker", "Light Tobacco Smoker", "Smoker, Current Status Unknown"),
                            "Not Smoker" = c("Former Smoker", "Never Smoker", "Passive Smoke Exposure - Never Smoker"),
-                           "Unknown" = "Unknown If Ever Smoked")
+                           "Unknown" = "Unknown If Ever Smoked") %>% 
+  relevel(df$smoking, ref = "Not Smoker")
 
 # Collapse levels for marital status
 df$marital_status <- fct_collapse(df$marital_status,
                                   "Single" = c("Divorced", "Legally Separated", "RDP-Dissolved", "Single", "Widowed"), 
-                                  "Paired" = c("Married", "Significant Other"))
+                                  "Paired" = c("Married", "Significant Other")) %>% 
+  relevel(df$marital_status, ref = "Single")
 
 # Collapse levels for language 
-df$language <- factor(ifelse(df$language=="English", "English", "Not English"))
+df$language <- factor(ifelse(df$language=="English", "English", "Not English")) %>% 
+  relevel(df$language, ref = "English")
 
 # Recode `end_in_death` as binary variable where yes=1
 df$end_in_death <- as.integer(df$end_in_death=="Yes", 1, 0)
@@ -92,6 +98,9 @@ df$admission_stage <- case_when(df$admission_stage==4 ~ 4,
                                 df$admission_stage==5 ~ 5,
                                 df$admission_stage==6 ~ 6,
                                 df$admission_stage %in% 7:9 ~ 7)
+
+# Set reference level for `sex` 
+df$sex <- relevel(df$sex, ref = "Male")
 ```
 
 # Save dataframe as CSV and RSD

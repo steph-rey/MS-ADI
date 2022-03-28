@@ -47,7 +47,7 @@ head(df, n=10)
 # Compare full and null models -- Readmit (`readmit`)
 ```{r Full and null models of LOS}
 # FULL MODEL 
-m_full_readmit <- glm(readmit ~ age + sex + smoking + cci_total + marital_status + language + insurance_type + pat_race + ethnicity + ADI + admission_stage, data = df, family = 'binomial')
+m_full_readmit <- glm(readmit ~ age + sex + smoking + cci_total + marital_status + language + insurance_type + pat_race + ethnicity + ADI + admission_stage + BMI, data = df, family = 'binomial')
 
 # Odds ratio of coefficients
 exp(cbind("Odds ratio"=coef(m_full_readmit), confint.default(m_full_readmit, level=0.95)))
@@ -262,5 +262,22 @@ check_model(m_readmit_adm_stg)
 
 # Check model performance 
 model_performance(m_readmit_adm_stg)
+```
+
+## Readmit ~ BMI
+```{r Readmit ~ BMI}
+m_readmit_BMI <- glm(readmit ~  BMI, df, family = 'binomial')
+
+# Odds ratio of coefficients
+exp(cbind("Odds ratio"=coef(m_readmit_BMI), confint.default(m_readmit_BMI, level=0.95)))
+
+# Summarize regression output 
+summary(m_readmit_BMI)
+
+# Check model assumptions
+check_model(m_readmit_BMI)
+
+# Check model performance 
+model_performance(m_readmit_BMI)
 ```
 

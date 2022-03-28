@@ -49,7 +49,7 @@ head(df, n=10)
 # Compare full and null models -- Length of stay (`LOS`)
 ```{r Full and null models for LOS}
 # FULL MODEL 
-m_full_los <- lm(log(LOS) ~ age + sex + smoking + cci_total + marital_status + language + insurance_type + pat_race + ethnicity + ADI + admission_stage, data = df)
+m_full_los <- lm(log(LOS) ~ age + sex + smoking + cci_total + marital_status + language + insurance_type + pat_race + ethnicity + ADI + admission_stage + BMI, data = df)
 
 # Odds ratio of coefficients
 exp(cbind("Odds ratio"=coef(m_full_los), confint.default(m_full_los, level=0.95)))
@@ -263,5 +263,22 @@ check_model(m_LOS_adm_stg)
 
 # Check model performance 
 model_performance(m_LOS_adm_stg)
+```
+
+## LOS ~ BMI
+```{r LOS ~ BMI}
+m_LOS_BMI <- lm(log(LOS) ~ BMI, df)
+
+# Odds ratio of coefficients
+exp(cbind("Odds ratio"=coef(m_LOS_BMI), confint.default(m_LOS_BMI, level=0.95)))
+
+# Summarize regression output 
+summary(m_LOS_BMI)
+
+# Check model assumptions
+check_model(m_LOS_BMI)
+
+# Check model performance 
+model_performance(m_LOS_BMI)
 ```
 

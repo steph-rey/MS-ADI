@@ -48,7 +48,7 @@ head(df, n=10)
 
 ```{r Full model of CCI}
 # Full model of CCI
-m_CCI_full <- lm(cci_total ~ age + sex + smoking + marital_status + language + insurance_type + pat_race + ethnicity + ADI, data = df)
+m_CCI_full <- lm(cci_total ~ age + sex + smoking + marital_status + language + insurance_type + pat_race + ethnicity + ADI + BMI, data = df)
 
 # Odds ratio of coefficients
 exp(cbind("Odds ratio"=coef(m_CCI_full), confint.default(m_CCI_full, level=0.95)))
@@ -67,7 +67,7 @@ model_performance(m_CCI_full)
 
 ```{r Full model of admission stage}
 # Full model of admission stage
-m_adm_stg_full <- lm(admission_stage ~ age + sex + smoking + marital_status + language + insurance_type + pat_race + ethnicity + ADI + cci_total, data = df)
+m_adm_stg_full <- lm(admission_stage ~ age + sex + smoking + marital_status + language + insurance_type + pat_race + ethnicity + ADI + cci_total + BMI, data = df)
 
 # Odds ratio of coefficients
 exp(cbind("Odds ratio"=coef(m_adm_stg_full), confint.default(m_adm_stg_full, level=0.95)))
@@ -88,7 +88,7 @@ model_performance(m_adm_stg_full)
 tab_model(m_CCI_full, m_adm_stg_full,
           p.style = "numeric_stars",
           #show.reflvl = T,
-          pred.labels = c("Intercept", "Age", "Male", "Non-Smoker", "Unknown Smoker", "Marital Status: Paired", "Marital Status: Unknown/Declined", "Not English", "Private Insurance", "Asian", "Black", "White", "Unknown/Declined Race", "Hispanic/Latino", "Not Hispanic", "Area Deprivation Index (ADI)", "Charlson Comorbidity Index (CCI)"),
+          pred.labels = c("Intercept", "Age", "Male", "Non-Smoker", "Unknown Smoker", "Marital Status: Paired", "Marital Status: Unknown/Declined", "Not English", "Private Insurance", "Asian", "Black", "White", "Unknown/Declined Race", "Hispanic/Latino", "Not Hispanic", "Area Deprivation Index (ADI)", "Charlson Comorbidity Index (CCI)", "BMI"),
           dv.labels = c("CCI ~ Demog", "Severity at Admission ~ Demog + ADI + CCI"),
           title = 'Regression Models relating Demographics, CCI, ADI, and Severity at Admission')
 ```

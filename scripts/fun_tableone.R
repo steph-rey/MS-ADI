@@ -1,3 +1,4 @@
+## Source: https://github.com/BiostatsReportAutomation/Table1_R_Excel_Output ##
 
 ###############################################################################
 ### Table1 function 

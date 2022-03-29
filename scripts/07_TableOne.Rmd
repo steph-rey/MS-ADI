@@ -1,0 +1,133 @@
+---
+title: "Table One for Demog-Staging-ADI Data"
+author: "Steph Reynolds (Stephanie.Reynolds@ucsf.edu)"
+date: "`r format(Sys.time(), '%b %d, %Y  %H:%M %p')`"
+output:
+  html_document:
+    toc: true
+    number_sections: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+# Background
+
+## Project
+
+MINDSCAPE: Modeling of infectious network dynamics for surveillance, control and prevention enhancement
+
+## Description
+
+This scripts reads in the demographics, Covid staging, and ADI data (`dm_stg_adi_7.19.21.rds`) and creates a Table 1 using both, `table1` and `tableone` packages.
+
+## References (CRAN
+
+-   `tableone`: Create 'Table 1' to Describe Baseline Characteristics with or
+    without Propensity Score Weights ([Link](https://cran.r-project.org/web/packages/tableone/index.html))
+
+-   `table1`: Tables of Descriptive Statistics in HTML ([Link](https://cran.r-project.org/web/packages/table1/))
+
+# Install and load required packages
+
+```{r Load required packages, include=F}
+#install.packages("table1")
+library(table1)
+library(tableone)
+library(tidyverse)
+```
+
+# Import and preview data
+
+```{r Read in df}
+# Read in data and assign to `df`
+df <- readRDS("/Users/sreynolds2/Documents/GitHub/MS-ADI/data/dm_stg_adi_7.19.21.rds")
+
+# Preview first n=10 lines 
+head(df, n=10)
+
+# View column names
+colnames(df)
+
+glimpse(df)
+```
+
+# Convert variables to factor type
+
+```{r Convert to proper variable types }
+# Identify all vars to be converted to factor type and assign to vector `fctvars`
+fctvars <- c("cci_total", "ADI", "max_stage", "readmit", "end_in_death", "admission_stage", "severe_stg")
+
+# Use lapply function to convert vars to factor
+df[ ,fctvars] <- lapply(df[ , fctvars], factor)
+
+# Check structure and var types
+str(df)
+```
+
+# Assign variable labels and units
+
+```{r Assign var labels and units}
+label(df$age) <- "Age"
+label(df$sex)       <- "Sex"
+label(df$smoking)   <- "Smoking Status"
+label(df$BMI)       <- "BMI"
+label(df$cci_total) <- "CCI"
+label(df$marital_status) <- "Marital Status"
+label(df$language) <- "Language"
+label(df$insurance_type) <- "Insurance Type"
+label(df$pat_race) <- "Race"
+label(df$ethnicity) <- "Ethnicity"
+label(df$ADI) <- "Area Deprivation Index (ADI)"
+label(df$max_stage)  <- "Max Severity"
+label(df$readmit) <- "Readmit (Yes/No)"
+label(df$hospital_LOS) <- "Hospital Length of Stay"
+label(df$end_in_death) <- "Died in Hospital (Yes/No)"
+label(df$admission_stage)  <- "Admission Severity"
+label(df$severe_stg)  <- "Severe Morbidity and Mortality (Yes/No)"
+
+units(df$age)       <- "years"
+units(df$hospital_LOS) <- "days"
+```
+
+# Create Table 1 using `table1` package
+
+```{r table1 package}
+# Run table1 function with all variables 
+t1 <- table1::table1(~ age + sex + smoking + BMI + cci_total + marital_status + language + insurance_type + pat_race + ethnicity + ADI + max_stage + readmit + hospital_LOS + end_in_death + admission_stage + severe_stg,
+       data = df)
+
+# table1::knit_print.table1(t1)
+# Error: 'knit_print.table1' is not an exported object from 'namespace:table1'
+
+# table1::as.data.frame.table1(t1)
+# Error: 'as.data.frame.table1' is not an exported object from 'namespace:table1'
+```
+
+# Create Table 1 using `tableone` package
+
+```{r tableone package}
+# Assign col names to `vars` vector
+vars <- colnames(df)[-1]
+
+# Assign var labels to `labs` vector
+labs <- c("Age", "Sex", "Smoking Status", "BMI", "CCI", "Marital Status", "Language", "Insurance Type", "Race", "Ethnicity", "Area Deprivation Index (ADI)", "Max Severity", "Readmit (Yes/No)",  "Hospital Length of Stay", "Died in Hospital (Yes/No)", "Admission Severity", "Severe Morbidity and Mortality (Yes/No)")
+
+# Create Table One
+tableOne <- CreateTableOne(data = df, vars, includeNA = T)
+
+# Summary of continuous and categorical vars
+summary(tableOne)
+
+# Print table one
+print(tableOne,
+      showAllLevels = T, 
+      nonnormal = "hospital_LOS")
+
+# If you want to copy to Excel or Word, then set quote = TRUE
+print(tableOne, nonnormal = "hospital_LOS", quote = TRUE)
+
+# If you want to center-align values in Word, then set noSpaces = TRUE
+print(tableOne, nonnormal = "hospital_LOS", quote = TRUE, noSpaces = TRUE)
+```

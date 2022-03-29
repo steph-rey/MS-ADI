@@ -62,6 +62,9 @@ fctvars <- c("cci_total", "ADI", "max_stage", "readmit", "end_in_death", "admiss
 # Use lapply function to convert vars to factor
 df[ ,fctvars] <- lapply(df[ , fctvars], factor)
 
+df$readmit <- ifelse(df$readmit==0, "No", "Yes")
+df$severe_stg <- ifelse(df$severe_stg==0, "No", "Yes")
+
 # Check structure and var types
 str(df)
 ```
@@ -81,11 +84,11 @@ label(df$pat_race) <- "Race"
 label(df$ethnicity) <- "Ethnicity"
 label(df$ADI) <- "Area Deprivation Index (ADI)"
 label(df$max_stage)  <- "Max Severity"
-label(df$readmit) <- "Readmit (Yes/No)"
+label(df$readmit) <- "Readmit"
 label(df$hospital_LOS) <- "Hospital Length of Stay"
-label(df$end_in_death) <- "Died in Hospital (Yes/No)"
+label(df$end_in_death) <- "Died in Hospital"
 label(df$admission_stage)  <- "Admission Severity"
-label(df$severe_stg)  <- "Severe Morbidity and Mortality (Yes/No)"
+label(df$severe_stg)  <- "Severe Morbidity and Mortality"
 
 units(df$age)       <- "years"
 units(df$hospital_LOS) <- "days"
@@ -95,7 +98,10 @@ units(df$hospital_LOS) <- "days"
 
 ```{r table1 package}
 # Run table1 function with all variables 
-t1 <- table1::table1(~ age + sex + smoking + BMI + cci_total + marital_status + language + insurance_type + pat_race + ethnicity + ADI + max_stage + readmit + hospital_LOS + end_in_death + admission_stage + severe_stg,
+# t1 <- table1::table1(~ age + sex + smoking + BMI + cci_total + marital_status + language + insurance_type + pat_race + ethnicity + ADI + max_stage + readmit + hospital_LOS + end_in_death + admission_stage + severe_stg,
+       data = df)
+
+t1 <- table1::table1(~ age + sex + smoking + BMI + cci_total + marital_status + language + insurance_type + pat_race + ethnicity + ADI + readmit + hospital_LOS + admission_stage + severe_stg,
        data = df)
 
 # table1::knit_print.table1(t1)
